@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101914">
+  <title>GreenFields | Crop Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#">
+      <span class="brand-mark">✳</span>
+      <span><strong>greenfields</strong><small>AGRI INTELLIGENCE</small></span>
+    </a>
+    <div class="farm-switch"><span class="farm-icon">⌂</span><span><b>GreenFields Farm</b><small>South Field Estate</small></span><span class="chevron">⌄</span></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav class="nav-list">
+      <a class="nav-item active" href="#overview"><span>▦</span> Overview</a>
+      <a class="nav-item" href="#crops"><span>♧</span> Crop management</a>
+      <a class="nav-item" href="#reports"><span>▥</span> Yield reports</a>
+      <a class="nav-item" href="#activity"><span>◷</span> Activity history</a>
+      <a class="nav-item" href="#reminders"><span>♧</span> Reminders <i id="navReminderCount">0</i></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="season-card"><span class="season-dot"></span><span><small>CURRENT SEASON</small><b>Kharif 2026</b><small>Season tracking active</small></span></div>
+      <div class="profile"><div class="avatar">GF</div><span><b>Farm Manager</b><small>GreenFields Admin</small></span><button class="more" id="globalMenuButton" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open actions menu">•••</button>
+      <div class="global-menu" id="globalMenu" hidden><button type="button" id="menuRefresh">↻ Refresh dashboard</button><button type="button" id="menuAddCrop">＋ Add crop</button><button type="button" id="menuAddReminder">＋ Add reminder</button><a href="/api/reports.csv">↓ Export harvest CSV</a></div></div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="overview">
+    <header class="topbar">
+      <div class="breadcrumb">Workspace <span>/</span> <b>Overview</b></div>
+      <div class="top-actions"><span class="live-status"><i></i> Farm data synced</span><button class="icon-button" title="Refresh data" id="refreshBtn">↻</button><div class="avatar small">GF</div></div>
+    </header>
+    <section class="page-heading">
+      <div><div class="eyebrow">FRIDAY, OCTOBER 09, 2026 <span class="season-pill">KHARIF SEASON</span></div><h1>Good morning, Farm Manager <span>✳</span></h1><p>Here’s what’s happening across your fields today.</p></div>
+      <div class="heading-actions"><button class="btn btn-quiet" id="addActivityJump">＋ Log activity</button><button class="btn btn-primary" id="addCropJump">＋ Add crop</button></div>
+    </section>
+
+    <section class="stat-grid">
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon green">♧</span><span class="trend positive">● Live</span></div><p>Total cultivated area</p><div class="stat-value"><strong id="totalAcres">—</strong><span>acres</span></div><div class="stat-foot">Across all registered crop fields</div></article>
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon mint">◉</span><span class="trend neutral">Tracked</span></div><p>Active crop records</p><div class="stat-value"><strong id="activeCrops">—</strong><span>crops</span></div><div class="stat-foot"><span id="cropCount">—</span> total crop records</div></article>
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon amber">↗</span><span class="trend positive">Forecast</span></div><p>Expected yield</p><div class="stat-value"><strong id="expectedYield">—</strong><span>tons</span></div><div class="stat-foot">Estimated from active crop plans</div></article>
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon coral">◷</span><span class="trend warning">Action needed</span></div><p>Upcoming reminders</p><div class="stat-value"><strong id="upcomingReminders">—</strong><span>tasks</span></div><div class="stat-foot">Due within the next 7 days</div></article>
+    </section>
+
+    <section class="content-grid charts-grid">
+      <article class="panel chart-panel"><div class="panel-heading"><div><h2>Expected yield by crop</h2><p>Updates when you add or edit crop plans</p></div><button class="panel-menu" type="button" data-chart-info="yieldChart" aria-label="Yield chart information">•••</button></div><div class="chart-wrap"><canvas id="yieldChart"></canvas></div><div class="chart-legend"><span><i class="legend-dot l-green"></i> Expected yield (tons)</span><span class="chart-note">Based on saved crop plans</span></div></article>
+      <article class="panel chart-panel"><div class="panel-heading"><div><h2>Field distribution</h2><p>Cultivated area by crop type</p></div><button class="panel-menu" type="button" data-chart-info="areaChart" aria-label="Area chart information">•••</button></div><div class="donut-wrap"><canvas id="areaChart"></canvas><div class="donut-center"><strong id="donutAcres">—</strong><span>total acres</span></div></div><div id="areaLegend" class="area-legend"></div></article>
+    </section>
+
+    <section class="content-grid lower-grid">
+      <article class="panel" id="crops"><div class="panel-heading"><div><h2>Crop management</h2><p>Monitor crop cycles and expected harvests</p></div><button class="text-button" id="addCropInline">＋ New crop</button></div><div class="table-scroll"><table><thead><tr><th>CROP / VARIETY</th><th>AREA</th><th>SEASON</th><th>EXPECTED HARVEST</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="cropTable"><tr><td colspan="5" class="empty">Loading crops…</td></tr></tbody></table></div></article>
+      <article class="panel reminders-panel" id="reminders"><div class="panel-heading"><div><h2>Upcoming tasks</h2><p>Keep field operations on schedule</p></div><button class="text-button" id="addReminderJump">＋ Add</button></div><div class="reminder-list" id="reminderList"><div class="empty">Loading reminders…</div></div><button class="wide-quiet" id="showAllReminders">View all reminders <span>→</span></button></article>
+    </section>
+
+    <section class="content-grid bottom-grid">
+      <article class="panel" id="reports"><div class="panel-heading"><div><h2>Seasonal yield reports</h2><p>Compare recorded harvests and yield per acre</p></div><a class="btn btn-quiet btn-sm" href="/api/reports.csv">↓ Export CSV</a></div><div class="table-scroll"><table><thead><tr><th>CROP</th><th>SEASON</th><th>HARVEST DATE</th><th>YIELD</th><th>TONS / ACRE</th></tr></thead><tbody id="reportTable"><tr><td colspan="5" class="empty">Loading reports…</td></tr></tbody></table></div></article>
+      <article class="panel" id="activity"><div class="panel-heading"><div><h2>Field activity</h2><p>Recent operations across your farm</p></div><button class="text-button" id="activityFormJump">＋ Log activity</button></div><div class="timeline" id="activityList"><div class="empty">Loading history…</div></div></article>
+    </section>
+
+    <footer><span>© 2026 GreenFields Agri Intelligence</span><span><i class="footer-dot"></i> Connected to local farm database</span></footer>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="cropDialog" class="modal">
+  <form id="cropForm" class="modal-form">
+    <div class="modal-heading"><div><span class="eyebrow">FIELD MANAGEMENT</span><h2>Add a crop</h2></div><button type="button" class="modal-close" data-close="cropDialog">×</button></div>
+    <label>Crop name<select name="cropPreset" id="cropPreset" required><option value="Paddy">Paddy</option><option value="Maize">Maize</option><option value="Banana">Banana</option><option value="Other">Other (type a name)</option></select></label><label id="customCropNameWrap" hidden>Enter crop name<input id="customCropName" name="customCropName" placeholder="e.g. Tomato, Cotton, Dragon fruit"></label>
+    <label>Variety<input name="variety" placeholder="e.g. IR-64" required></label>
+    <div class="form-row"><label>Area (acres)<input name="areaAcres" type="number" min="0.1" step="0.1" required></label><label>Expected yield (tons)<input name="expectedYieldTons" type="number" min="0" step="0.1" required></label></div>
+    <label>Season<input name="season" placeholder="e.g. Rabi 2026" required></label>
+    <div class="form-row"><label>Planting date<input name="plantedOn" type="date" required></label><label>Expected harvest<input name="expectedHarvest" type="date" required></label></div>
+    <label>Status<select name="status"><option>Growing</option><option>Planned</option><option>Harvested</option></select></label>
+    <div class="modal-actions"><button type="button" class="btn btn-quiet" data-close="cropDialog">Cancel</button><button class="btn btn-primary" type="submit">Save crop</button></div>
+  </form>
+</dialog>
+
+<dialog id="activityDialog" class="modal">
+  <form id="activityForm" class="modal-form">
+    <div class="modal-heading"><div><span class="eyebrow">FIELD JOURNAL</span><h2>Log an activity</h2></div><button type="button" class="modal-close" data-close="activityDialog">×</button></div>
+    <label>Crop<select name="cropId" id="activityCrop" required></select></label>
+    <label>Activity type<select name="type"><option>Irrigation</option><option>Fertilizer</option><option>Inspection</option><option>Pest control</option><option>Planting</option><option>Other</option></select></label>
+    <label>Date<input name="activityDate" type="date" required></label>
+    <label>Details<textarea name="details" rows="3" placeholder="What happened in the field?" required></textarea></label>
+    <div class="modal-actions"><button type="button" class="btn btn-quiet" data-close="activityDialog">Cancel</button><button class="btn btn-primary" type="submit">Save activity</button></div>
+  </form>
+</dialog>
+
+<dialog id="reminderDialog" class="modal">
+  <form id="reminderForm" class="modal-form">
+    <div class="modal-heading"><div><span class="eyebrow">TASK PLANNER</span><h2>Add a reminder</h2></div><button type="button" class="modal-close" data-close="reminderDialog">×</button></div>
+    <label>Crop<select name="cropId" id="reminderCrop" required></select></label>
+    <label>Task type<select name="type"><option>Irrigation</option><option>Harvest</option><option>Inspection</option><option>Fertilizer</option><option>Pest control</option></select></label>
+    <label>Due date<input name="dueDate" type="date" required></label>
+    <label>Notes<input name="notes" placeholder="What needs to be done?" required></label>
+    <div class="modal-actions"><button type="button" class="btn btn-quiet" data-close="reminderDialog">Cancel</button><button class="btn btn-primary" type="submit">Save reminder</button></div>
+  </form>
+</dialog>
+
+<script src="/app.js"></script>
+</body>
+</html>

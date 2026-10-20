@@ -1,0 +1,9 @@
+﻿target/
+database/*.db
+database/*.db-shm
+database/*.db-wal
+database/backups/
+.idea/
+.vscode/
+*.log
+.env
