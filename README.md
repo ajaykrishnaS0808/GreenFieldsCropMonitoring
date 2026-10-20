@@ -2,6 +2,8 @@
 
 A professional dark-green/charcoal web dashboard for the GreenFields Agri Farm college micro-project.
 
+Java Spring Boot crop monitoring and yield management microproject.
+
 ## Technology
 - Frontend: HTML, CSS, JavaScript, Chart.js
 - Backend: Java 17 + Spring Boot REST API
@@ -38,8 +40,7 @@ Run the app:
 mvn spring-boot:run
 ```
 
-Then open:
-`http://localhost:8080`
+Then open: `http://localhost:8080`
 
 Stop the app with `Ctrl+C` in the terminal. The database is created automatically at `database\farm.db` on first run. Sample rows are inserted only if the crops table is empty. Your saved changes remain in SQLite after restarting the app.
 
